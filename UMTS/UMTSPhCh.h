@@ -235,7 +235,10 @@ struct ChannelTreeElt
 	DCHFEC *mDch;	// The DPDCH, although we could put the other PhChs in here too. (SCCPCH, PCCPCH, etc)
 	bool available(bool checkOnlyReserved);
 	bool active(void);
-	ChannelTreeElt() : mReserved(0), mDch(0) {}
+	//ChannelTreeElt() : mReserved(0), mDch(0) {}
+    	// @SKS@ Bugfix: wrong not to initialize mAlsoReserved
+	ChannelTreeElt() : mReserved(0), mReserved(0), mDch(0) {}
+	ChannelTreeElt() : mReserved(0), mAlsoReserved(0), mDch(0) {}
 };
 
 
