@@ -789,11 +789,11 @@ bool ChannelTree::isTierFreeDownward(Tier tier,unsigned startcode, unsigned widt
 			if (badcode ) { *badcode = code; }
 			return false;				// in use.
 		}
-		if (!isTierFreeDownward(tier+1,2*startcode,2*width,checkOnlyReserved,badtier,badcode)) {return false;}// something underneath is in use.
-	}
-	return true;		// entire specified sub-tree is free.
-}
-
+		// if (!isTierFreeDownward(tier+1,2*startcode,2*width,checkOnlyReserved,badtier,badcode)) {return false;}// something underneath is in use.if (!isTierFreeDownward(tier+1,2*startcode,2*width,checkOnlyReserved,badtier,badcode)) {return false;}// something underneath is in use.
+             if (!isTierFreeDownward(tier+1,2*code,2,checkOnlyReserved,badtier,badcode)) {return false;}// something underneath is in use.
+        }
+        return true;            // entire specified sub-tree is free.
+ }
 // This function opens the channel before returning to prevent a race.
 // TODO: If we cannot allocate a channel with the specified KBps, should we allocate a lower-bandwidth ch?
 DCHFEC *ChannelTree::chChooseByTier(Tier tier)
@@ -802,6 +802,7 @@ DCHFEC *ChannelTree::chChooseByTier(Tier tier)
 	unsigned sf = tier2sf(tier);
 	// For a channel to be free the sub-tree below and all channels above that chcode must be unused.
 	for (unsigned chcode = 0; chcode < sf; chcode++) {
+		printf("\nTier: %d, sf: %d, chcode: %d", tier, sf, chcode);
 		// Harvind (3-11-13) upward search should only check reserved codes, don't care if upward codes are "also reserved"
 		if (isTierFreeDownward(tier,chcode,1,false,0,0) && isTierFreeUpward(tier,chcode,true,0,0)) {
 			DCHFEC *result = mTree[tier][chcode].mDch;
@@ -919,13 +920,10 @@ std::ostream& operator<<(std::ostream& os, const ChannelTree&tree)
 			bool active = cte->mDch->phChAllocated();
 			bool reserved = cte->mReserved;
 			bool alsoReserved = cte->mAlsoReserved;
-			if (active || reserved) {
-				os << "PhCh(sf=" <<sf<< ",ch=" <<chcode<< ")=";
-				if (reserved) os <<"reserved";
-				if (alsoReserved) os <<" alsoReserved";
-				if (reserved&&active) os <<",";
-				if (active) os <<"active";
-				os <<" ";
+			if (active || reserved || alsoReserved) {
+                                os << "PhCh(sf=" <<sf<< ",ch=" <<chcode<< ")=";
+                                if (reserved) os <<"reserved";
+                                if (alsoReserved) os <<" alsoReserved";
 			}
 		}
 	}
